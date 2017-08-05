@@ -22,6 +22,11 @@ Here is the representation of table 2 with base 360.
 
 ![](mult_02_360_480.png)
 
+
+Here is an animation that shows the evolution of these circles when base goes from 10 to 40.
+
+![](https://upload.wikimedia.org/wikipedia/commons/8/83/Multiplication_prop_curve_base.gif)
+
 Here is an animation that shows the evolution of these circles when factor goes from 2 to 4.
 
 ![](https://upload.wikimedia.org/wikipedia/commons/3/3f/Multiplication_prop_curve.gif)
