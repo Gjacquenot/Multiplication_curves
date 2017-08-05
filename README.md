@@ -43,3 +43,6 @@ Here are some command line examples that can be used to create images
 
     # Same as previous but with fully developped argument
     python multiplication.py --text --base 360 --factor 2--3 --number 21 --parallel --output mult.mp4
+
+Several implementations can be found on Internet.
+A live demo is available [here](http://8holon.github.io/CircularGraph/)
