@@ -84,7 +84,6 @@ def create_a_multiplication_figure(**kwargs):
             add_numbers(range(base))
         else:
             pfactors = prime_factors(base)
-            print(pfactors)
             nfactors = len(pfactors)
             if nfactors == 1:
                 add_numbers(range(pfactors[0]))
@@ -200,7 +199,7 @@ def main():
                                      epilog=get_epilog(),
                                      formatter_class=CustomFormatter)
     pa = parser.add_argument
-    pa('-b', '--base', type=int, help='positive integer representing the base to use. Reasonnable value is 100', default=100)
+    pa('-b', '--base', type=str, help='positive integer representing the base to use. Reasonnable value is 100', default=100)
     pa('-f', '--factor', type=str, help='positive float factor to use. When creating an animation, start and end values are separated with -- (e.g. 2--3)' , default=2.0)
     pa('-o', '--output', type=str, default=None, help='name of the generated file. If not provided, result will display on screen. Extensions can be png, gif, mp4')
     pa('-t', '--text', action='store_true', help='boolean used to display base and factor on each generated image.')
@@ -217,19 +216,32 @@ def main():
     if output:
         output_lower = output.lower()
         if output_lower.endswith('.gif') or output_lower.endswith('.mp4'):
-            f = args.factor.split('--')
-            v = [e for e in np.linspace(float(f[0]), float(f[1]), args.number)]
-            filenames = [get_filename(base=args.base, factor=k) for k in v]
+            animate_factor = '--' in args.factor
+            animate_base = '--' in args.base
+            if animate_factor and animate_base:
+                raise Exception('One can not animate both')
+            if not (animate_factor or animate_base):
+                raise Exception('One needs to specify which parameter to animate')
+            if animate_factor:
+                f = args.factor.split('--')
+                factors = [e for e in np.linspace(float(f[0]), float(f[1]), args.number)]
+                bases = [int(args.base)] * args.number
+                filenames = [get_filename(base=bases[0], factor=f) for f in factors]
+            else:
+                b = args.base.split('--')
+                bases = range(int(b[0]), int(b[1]) + 1)
+                factors = [float(args.factor)] * len(bases)
+                filenames = [get_filename(base=b, factor=factors[0]) for b in bases]
             if args.parallel:
                 from multiprocessing import cpu_count
                 from multiprocessing import Pool
                 ncores = max(1, cpu_count()-1)
-                listOfInputs = [{'base':args.base, 'factor':f, 'text':args.text, 'filename':k, 'dpi':args.dpi} for f, k in zip(v, filenames)]
+                listOfInputs = [{'base':b, 'factor':f, 'text':args.text, 'filename':k, 'dpi':args.dpi} for f, b, k in zip(factors, bases, filenames)]
                 p = Pool(ncores)
                 p.map(create_a_multiplication_figure_to_expand, listOfInputs)
             else:
-                for k, filename in zip(v, filenames):
-                    create_a_multiplication_figure(base=args.base, factor=k, text=args.text, filename=filename, dpi=args.dpi)
+                for f, b, filename in zip(factors, bases, filenames):
+                    create_a_multiplication_figure(base=b, factor=f, text=args.text, filename=filename, dpi=args.dpi)
             if output_lower.endswith('.gif'):
                 create_animated_gif(filename=output, pngs=filenames, continuous=args.continuous)
             elif output_lower.endswith('.mp4'):
